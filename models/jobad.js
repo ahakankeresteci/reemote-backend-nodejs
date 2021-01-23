@@ -1,31 +1,44 @@
 const mongoose = require('mongoose')
+const timezone = require('mongoose-timezone')
 
 const jobadSchema = mongoose.Schema({
-    title:{
+    title: {
         type: String,
-        required:[true,'Title is required']
+        required: [true, 'Title is required']
     },
-    category:{
+    category: {
         type: String,
-        required:[true,'category is required']
+        required: [true, 'category is required']
     },
-    author_user_name:{
+    author_user_name: {
         type: String,
-        required:[true,'Author is required']
+        required: [true, 'Author is required']
     },
-    content:{
+    content: {
         type: String,
-        required:[true,'content is required']
+        required: [true, 'content is required']
     },
-    image_url:{
+    image_url: {
         type: String,
-        required:[true,'image_url is required']
+        required: [true, 'image_url is required']
     },
-    price:{
+    price: {
         type: String,
-        required:[true,'price is required']
+        required: [true, 'price is required']
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
     }
 })
 
-const Jobad = mongoose.model('jobads',jobadSchema)
+jobadSchema.set('timestamps', true)
+timezone.name = process.env.TIMEZONE
+jobadSchema.plugin(timezone)
+
+const Jobad = mongoose.model('jobads', jobadSchema)
 module.exports = Jobad

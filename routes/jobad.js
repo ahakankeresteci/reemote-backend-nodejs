@@ -1,9 +1,12 @@
 const express = require('express')
 const { ObjectID } = require('mongodb')
+const auth = require('../middleware/auth')
 const router = express.Router()
 const jobad = require('../models/jobad')
-
-
+const jobadValidation = require('../validations/jobad')
+const bodyParser = require('body-parser')
+const jsonParser = bodyParser.json()
+const users = require('../models/user')
 
 //get all job advertisements
 router.get('/', async (req, res) => {
@@ -17,7 +20,7 @@ router.get('/', async (req, res) => {
     let totalElements = await jobad.estimatedDocumentCount()
     let totalPages = parseInt(totalElements / pageSize) + 1
 
-    let jobadsList = await jobad.find({}).limit(pageSize * 1).skip(pageNumber * pageSize)
+    let jobadsList = await jobad.find({ isDeleted: false }).limit(pageSize * 1).skip(pageNumber * pageSize)
 
     return res.json({
       jobads: jobadsList,
@@ -34,7 +37,7 @@ router.get('/', async (req, res) => {
   }
 })
 
-//get categorized job advertisements
+//kategoriye göre ilanları listele
 router.get('/search/findByCategory', async (req, res) => {
   let category = req.query.category;
 
@@ -45,11 +48,11 @@ router.get('/search/findByCategory', async (req, res) => {
   if (!pageSize) { pageSize = 5 }
 
   try {
-    let totalElements = await jobad.countDocuments({category: category})
+    let totalElements = await jobad.countDocuments({ category: category, isDeleted: false })
     let totalPages = parseInt(totalElements / pageSize) + 1
 
     let jobadsList = await jobad.find({
-      category: category
+      category: category, isDeleted: false
     }).limit(pageSize * 1).skip(pageNumber * pageSize)
     return res.json({
       jobads: jobadsList,
@@ -68,7 +71,7 @@ router.get('/search/findByCategory', async (req, res) => {
 })
 
 
-//get job advertisements list by search
+//Search key'e göre ilan listele
 router.get('/search/findByTitleLikeIgnoreCase', async (req, res) => {
   let keyword = req.query.title
   let keyRegex = new RegExp(keyword, "i")
@@ -80,13 +83,14 @@ router.get('/search/findByTitleLikeIgnoreCase', async (req, res) => {
   if (!pageSize) { pageSize = 5 }
 
   try {
-    let totalElements = await jobad.countDocuments({title: keyRegex})
+    let totalElements = await jobad.countDocuments({ title: keyRegex })
     let totalPages = parseInt(totalElements / pageSize) + 1
 
     let jobadsList = await jobad.find({
-      title: keyRegex
+      title: keyRegex,
+      isDeleted: false
     }).limit(pageSize * 1).skip(pageNumber * pageSize)
-    
+
     return res.json({
       jobads: jobadsList,
       page: {
@@ -102,7 +106,7 @@ router.get('/search/findByTitleLikeIgnoreCase', async (req, res) => {
   }
 })
 
-//get job ad by id
+//id ile ilan listele
 router.get('/:id', async (req, res) => {
   let id = req.params.id
   try {
@@ -116,5 +120,17 @@ router.get('/:id', async (req, res) => {
   }
 })
 
+router.post('/create', auth, jsonParser, jobadValidation, async (req, res) => {
+  try {
+    let email = req.userData.email
+    let user = await users.findOne({ email: email })
+    req.body.author_user_name = user.user_name
+    const createdAd = await jobad(req.body).save()
+    res.status(201).send(createdAd)
+  }
+  catch (err) {
+    res.status(400).send("error: " + err)
+  }
+})
 
 module.exports = router
