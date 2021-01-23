@@ -280,7 +280,7 @@ __webpack_require__.r(__webpack_exports__);
 class JobadService {
     constructor(httpClient) {
         this.httpClient = httpClient;
-        this.baseUrl = 'http://localhost:3000/api/jobAdvertisements';
+        this.baseUrl = '/api/jobAdvertisements';
     }
     getJobadListPagination(categoryName, page, pageSize) {
         var searchUrl = `${this.baseUrl}/search/findByCategory?category=${categoryName}&page=${page}&size=${pageSize}`; //Kategori listelendiğinde pagination ile
@@ -1336,7 +1336,7 @@ class Auth {
     login(email, password) {
         return Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__awaiter"])(this, void 0, void 0, function* () {
             try {
-                this.http.post('http://localhost:3000/api/users/login', { email: email, password: password })
+                this.http.post('/api/users/login', { email: email, password: password })
                     .subscribe(res => {
                     this.setSession(res);
                 });
@@ -1349,7 +1349,7 @@ class Auth {
     register(username, firstname, lastname, email, password) {
         return Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__awaiter"])(this, void 0, void 0, function* () {
             try {
-                this.http.post('http://localhost:3000/api/users/register', { user_name: username, first_name: firstname, last_name: lastname, email: email, password: password })
+                this.http.post('/api/users/register', { user_name: username, first_name: firstname, last_name: lastname, email: email, password: password })
                     .subscribe(res => {
                     this.setSession(res);
                     console.log("Kayıt Başarılı");
