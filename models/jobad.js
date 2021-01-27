@@ -19,8 +19,7 @@ const jobadSchema = mongoose.Schema({
         required: [true, 'content is required']
     },
     image_url: {
-        type: String,
-        required: [true, 'image_url is required']
+        type: String
     },
     price: {
         type: String,

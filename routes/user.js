@@ -32,14 +32,15 @@ router.get('/profile', auth, async (req, res) => {
 router.get('/profile/:username', async (req, res) => {
     try {
         const user = await users.findOne({ user_name: req.params.username, isDeleted: false })
+        const jobadList = await jobads.find({author_user_name: req.params.username, isDeleted:false})
         //özel bilgileri sil
-        console.log(user)
         return res.json({
             user_name: user.user_name,
             first_name: user.first_name,
             last_name: user.last_name,
             createdAt: user.createdAt,
-            updatedAt: user.updatedAt
+            updatedAt: user.updatedAt,
+            jobads: jobadList
         })
     }
     catch (err) { res.status(400).send("invalid username") }
@@ -61,7 +62,7 @@ router.post('/register', registerValidation, jsonParser, async (req, res) => {
             return res.status(400).send('Invalid password or email');
         }
 
-        const isEmailExist = await users.findOne({ email: req.body.email });
+        const isEmailExist = await users.findOne({ email: req.body.email,isDeleted:false });
 
         if (isEmailExist) {
             console.log("invalid email")
@@ -69,7 +70,7 @@ router.post('/register', registerValidation, jsonParser, async (req, res) => {
         }
 
 
-        const isUsernameExist = await users.findOne({ user_name: req.body.user_name })
+        const isUsernameExist = await users.findOne({ user_name: req.body.user_name ,isDeleted:false})
         if (isUsernameExist) {
             console.log("username exist")
             return res.status(400).send('Username already exist');
@@ -107,14 +108,15 @@ router.post('/login', jsonParser, async (req, res) => {
 
     if (!isPasswordCorrect) { return res.status(400).send("Wrong Password or Email") }
 
-    console.log(theUser)
+    
     const token = jwt.sign({ id: theUser._id, email: theUser.email }, process.env.JWT_SECRET_KEY, { expiresIn: "2h" })
-    res.status(200).json({ success: true, token: token, expiresIn: 2, data: { mail: theUser.email, username: theUser.user_name } });
+    res.status(200).json({ success: true, token: token, expiresIn: 2, data: { mail: theUser.email, username: theUser.user_name, } });
 
 })
 
 
 router.delete('/profile', auth, async (req, res) => {
+   
     try {
         const theUser = await users.findOne({ _id: req.userData.id })
 
@@ -140,9 +142,6 @@ router.put('/profile', auth, jsonParser, async (req, res) => {
         const updateInfo = req.body
         const theUser = await users.findOne({ _id: id })
 
-        console.log("yeni " + updateInfo.user_name, "eski " + theUser.user_name)
-        console.log(updateInfo.user_name && updateInfo.user_name != theUser.user_name)
-
         if (updateInfo.user_name && updateInfo.user_name != theUser.user_name) { //username değişirse postları da güncelle
             await jobads.updateMany({ author_user_name: theUser.user_name }, { author_user_name: updateInfo.user_name })
         }
@@ -150,7 +149,7 @@ router.put('/profile', auth, jsonParser, async (req, res) => {
         if (updateInfo.password) {
             updateInfo.password = await bcrypt.hash(updateInfo.password, 10)
         }
-        console.log(updateInfo)
+        
         const updated = await users.updateOne({ _id: id }, updateInfo)
 
         res.status(200).send(updated)

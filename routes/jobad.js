@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
   if (!pageSize) { pageSize = 5 }
 
   try {
-    let totalElements = await jobad.estimatedDocumentCount()
+    let totalElements = await jobad.countDocuments({isDeleted:false})
     let totalPages = parseInt(totalElements / pageSize) + 1
 
     let jobadsList = await jobad.find({ isDeleted: false }).limit(pageSize * 1).skip(pageNumber * pageSize)
@@ -83,7 +83,7 @@ router.get('/search/findByTitleLikeIgnoreCase', async (req, res) => {
   if (!pageSize) { pageSize = 5 }
 
   try {
-    let totalElements = await jobad.countDocuments({ title: keyRegex })
+    let totalElements = await jobad.countDocuments({ title: keyRegex,isDeleted:false })
     let totalPages = parseInt(totalElements / pageSize) + 1
 
     let jobadsList = await jobad.find({
@@ -120,17 +120,60 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-router.post('/create', auth, jsonParser, jobadValidation, async (req, res) => {
+router.post('/create', auth, jsonParser, async (req, res) => {
   try {
     let email = req.userData.email
     let user = await users.findOne({ email: email })
     req.body.author_user_name = user.user_name
-    const createdAd = await jobad(req.body).save()
+    console.log(req.body,req.header)
+    let createdAd = await jobad(req.body).save()
+    
     res.status(201).send(createdAd)
   }
   catch (err) {
+    console.log("create ad error")
     res.status(400).send("error: " + err)
   }
 })
+
+
+router.put('/update',auth,jsonParser, async(req,res)=>{
+ 
+    try{
+      let email = req.userData.email
+      let user = await users.findOne({email: email})
+      if(req.body.author_user_name==user.user_name){
+        let updatedJob = await jobad.findOneAndUpdate(
+          {_id : req.body._id},
+          req.body
+        )
+        res.status(200).send(updatedJob)
+      }else{
+       
+        throw error
+      }
+    }
+    catch(err){
+      res.status(400).send(err)
+    }
+})
+
+router.delete('/delete/:id',auth,jsonParser,async (req,res)=>{
+  try {
+    let email = req.userData.email
+    let user = await users.findOne({email: email})
+    let thejobad = await jobad.findOne({_id: ObjectID(req.params.id)} )
+    if(thejobad.author_user_name==user.user_name){
+      await jobad.findOneAndUpdate({_id: ObjectID(thejobad._id)},{isDeleted:true,isActivated:false})
+      res.sendStatus(200)
+    }else{
+      throw error
+    }
+  } catch (error) {
+    console.log(error)
+    res.sendStatus(400)
+  }
+})
+
 
 module.exports = router

@@ -31,6 +31,15 @@ const userSchema = mongoose.Schema({
         type: String,
         required: [true, 'Password is required']
     },
+    job: {
+        type: String
+    },
+    location: {
+        type: String
+    },
+    website: {
+        type: String
+    },
     isActive: {
         type: Boolean,
         default: true
