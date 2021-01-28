@@ -19,7 +19,8 @@ const jobadSchema = mongoose.Schema({
         required: [true, 'content is required']
     },
     image_url: {
-        type: String
+        type: String,
+        default: "assets/images/jobads/placeholder.png"
     },
     price: {
         type: String,

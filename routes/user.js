@@ -15,7 +15,7 @@ const jsonParser = bodyParser.json()
 //kullanıcıya kendi profil bilgilerini gönder
 router.get('/profile', auth, async (req, res) => {
     const email = req.userData.email
-    const user = await users.findOne({ email: email })
+    const user = await users.findOne({ email: email ,isDeleted:false})
     //parolayı sil
     return res.json({
         user_name: user.user_name,
@@ -40,7 +40,10 @@ router.get('/profile/:username', async (req, res) => {
             last_name: user.last_name,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
-            jobads: jobadList
+            jobads: jobadList,
+            location: user.location,
+            job: user.job,
+            website: user.website
         })
     }
     catch (err) { res.status(400).send("invalid username") }
@@ -118,7 +121,7 @@ router.post('/login', jsonParser, async (req, res) => {
 router.delete('/profile', auth, async (req, res) => {
    
     try {
-        const theUser = await users.findOne({ _id: req.userData.id })
+        const theUser = await users.findOne({ _id: req.userData.id , isDeleted:false})
 
         await jobads.updateMany({ author_user_name: theUser.user_name },
             {
@@ -140,7 +143,7 @@ router.put('/profile', auth, jsonParser, async (req, res) => {
     try {
         const id = req.userData.id
         const updateInfo = req.body
-        const theUser = await users.findOne({ _id: id })
+        const theUser = await users.findOne({ _id: id ,isDeleted:false})
 
         if (updateInfo.user_name && updateInfo.user_name != theUser.user_name) { //username değişirse postları da güncelle
             await jobads.updateMany({ author_user_name: theUser.user_name }, { author_user_name: updateInfo.user_name })
@@ -150,7 +153,7 @@ router.put('/profile', auth, jsonParser, async (req, res) => {
             updateInfo.password = await bcrypt.hash(updateInfo.password, 10)
         }
         
-        const updated = await users.updateOne({ _id: id }, updateInfo)
+        const updated = await users.updateOne({ _id: id ,isDeleted:false}, updateInfo)
 
         res.status(200).send(updated)
 

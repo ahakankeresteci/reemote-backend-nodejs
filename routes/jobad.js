@@ -111,7 +111,8 @@ router.get('/:id', async (req, res) => {
   let id = req.params.id
   try {
     let thejobad = await jobad.find({
-      _id: ObjectID(id)
+      _id: ObjectID(id),
+      isDeleted:false
     })
     return res.json(thejobad[0])
   }
@@ -123,7 +124,7 @@ router.get('/:id', async (req, res) => {
 router.post('/create', auth, jsonParser, async (req, res) => {
   try {
     let email = req.userData.email
-    let user = await users.findOne({ email: email })
+    let user = await users.findOne({ email: email , isDeleted:false})
     req.body.author_user_name = user.user_name
     console.log(req.body,req.header)
     let createdAd = await jobad(req.body).save()
@@ -141,10 +142,11 @@ router.put('/update',auth,jsonParser, async(req,res)=>{
  
     try{
       let email = req.userData.email
-      let user = await users.findOne({email: email})
+      let user = await users.findOne({email: email, isDeleted:false})
       if(req.body.author_user_name==user.user_name){
         let updatedJob = await jobad.findOneAndUpdate(
-          {_id : req.body._id},
+          {_id : req.body._id,
+          isDeleted:false},
           req.body
         )
         res.status(200).send(updatedJob)
@@ -161,8 +163,8 @@ router.put('/update',auth,jsonParser, async(req,res)=>{
 router.delete('/delete/:id',auth,jsonParser,async (req,res)=>{
   try {
     let email = req.userData.email
-    let user = await users.findOne({email: email})
-    let thejobad = await jobad.findOne({_id: ObjectID(req.params.id)} )
+    let user = await users.findOne({email: email,isDeleted:false})
+    let thejobad = await jobad.findOne({_id: ObjectID(req.params.id), isDeleted:false} )
     if(thejobad.author_user_name==user.user_name){
       await jobad.findOneAndUpdate({_id: ObjectID(thejobad._id)},{isDeleted:true,isActivated:false})
       res.sendStatus(200)
