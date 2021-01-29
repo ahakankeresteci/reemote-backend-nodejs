@@ -157,7 +157,7 @@ router.put('/profile', auth, jsonParser, async (req, res) => {
         await users.updateOne({ _id: id ,isDeleted:false}, updateInfo)
         let updated = await users.findOne({_id: id})
       
-        console.log("updated: "+updated)
+        
         res.status(200).send(updated)
 
     }
