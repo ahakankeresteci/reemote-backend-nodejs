@@ -134,7 +134,7 @@ router.delete('/profile', auth, async (req, res) => {
             isDeleted: true,
             isActive: false
         })
-        res.sendStatus(200)
+        res.status(200).send({success:true})
 
     } catch (err) { res.status(400).send(err) }
 
