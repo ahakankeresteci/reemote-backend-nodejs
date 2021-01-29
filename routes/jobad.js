@@ -143,12 +143,14 @@ router.put('/update',auth,jsonParser, async(req,res)=>{
     try{
       let email = req.userData.email
       let user = await users.findOne({email: email, isDeleted:false})
+      console.log(req.body)
       if(req.body.author_user_name==user.user_name){
         let updatedJob = await jobad.findOneAndUpdate(
           {_id : req.body._id,
           isDeleted:false},
           req.body
         )
+        console.log(updatedJob)
         res.status(200).send(updatedJob)
       }else{
        
@@ -165,17 +167,21 @@ router.delete('/delete/:id',auth,jsonParser,async (req,res)=>{
     let email = req.userData.email
     let user = await users.findOne({email: email,isDeleted:false})
     let thejobad = await jobad.findOne({_id: ObjectID(req.params.id), isDeleted:false} )
-    if(thejobad.author_user_name==user.user_name){
+      console.log(thejobad.author_user_name,user.user_name)
+    if(thejobad.author_user_name == user.user_name){
       await jobad.findOneAndUpdate({_id: ObjectID(thejobad._id)},{isDeleted:true,isActivated:false})
-      res.sendStatus(200)
+      console.info("jobad deleted")
+      return res.status(200).send({success:true})
     }else{
-      throw error
+      console.error("jobad cannot delete")
+      res.status(400).send({success:false})
     }
   } catch (error) {
-    console.log(error)
-    res.sendStatus(400)
+    console.error("jobad cannot delete: "+error)
+    res.status(400).send({success:false})
   }
 })
+
 
 
 module.exports = router

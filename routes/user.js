@@ -9,6 +9,7 @@ const router = express.Router()
 const users = require('../models/user')
 const jobads = require('../models/jobad')
 const bodyParser = require('body-parser')
+const { update } = require('../models/user')
 const jsonParser = bodyParser.json()
 
 
@@ -144,7 +145,7 @@ router.put('/profile', auth, jsonParser, async (req, res) => {
         const id = req.userData.id
         const updateInfo = req.body
         const theUser = await users.findOne({ _id: id ,isDeleted:false})
-
+        
         if (updateInfo.user_name && updateInfo.user_name != theUser.user_name) { //username değişirse postları da güncelle
             await jobads.updateMany({ author_user_name: theUser.user_name }, { author_user_name: updateInfo.user_name })
         }
@@ -153,8 +154,10 @@ router.put('/profile', auth, jsonParser, async (req, res) => {
             updateInfo.password = await bcrypt.hash(updateInfo.password, 10)
         }
         
-        const updated = await users.updateOne({ _id: id ,isDeleted:false}, updateInfo)
-
+        await users.updateOne({ _id: id ,isDeleted:false}, updateInfo)
+        let updated = await users.findOne({_id: id})
+      
+        console.log("updated: "+updated)
         res.status(200).send(updated)
 
     }

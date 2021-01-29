@@ -6,20 +6,20 @@ const userSchema = mongoose.Schema({
     user_name: {
         type: String,
         required: [true, 'Name is required'],
-        minlength: [5, 'Name can\'t be smaller than 5 characters'],
+        minlength: [4, 'Name can\'t be smaller than 5 characters'],
         maxlength: [64, 'Name can\'t be greater than 64 characters'],
         index: true
     },
     first_name: {
         type: String,
         required: [true, 'Name is required'],
-        minlength: [3, 'Name can\'t be smaller than 3 characters'],
+        minlength: [2, 'Name can\'t be smaller than 3 characters'],
         maxlength: [64, 'Name can\'t be greater than 64 characters']
     },
     last_name: {
         type: String,
         required: [true, 'Name is required'],
-        minlength: [3, 'Name can\'t be smaller than 3 characters'],
+        minlength: [2, 'Name can\'t be smaller than 3 characters'],
         maxlength: [64, 'Name can\'t be greater than 64 characters']
     },
     email: {
