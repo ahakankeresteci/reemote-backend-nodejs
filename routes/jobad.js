@@ -8,6 +8,7 @@ const bodyParser = require('body-parser')
 const jsonParser = bodyParser.json()
 const users = require('../models/user')
 
+
 //get all job advertisements
 router.get('/', async (req, res) => {
   let pageNumber = parseInt(req.query.page)

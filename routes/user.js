@@ -83,7 +83,7 @@ router.post('/register', registerValidation, jsonParser, async (req, res) => {
         let newUser = await users(req.body).save()
 
         
-        const token = jwt.sign({ id: newUser._id, email: newUser.email }, process.env.JWT_SECRET_KEY, { expiresIn: "2h" })
+        const token = jwt.sign({ id: newUser._id, email: newUser.email,user_name:newUser.user_name }, process.env.JWT_SECRET_KEY, { expiresIn: "2h" })
 
         res.status(201).json({ success: true, token: token, expiresIn: 2, data: { mail: newUser.email, username: newUser.user_name } });
 
@@ -113,7 +113,7 @@ router.post('/login', jsonParser, async (req, res) => {
     if (!isPasswordCorrect) { return res.status(400).send("Wrong Password or Email") }
 
     
-    const token = jwt.sign({ id: theUser._id, email: theUser.email }, process.env.JWT_SECRET_KEY, { expiresIn: "2h" })
+    const token = jwt.sign({ id: theUser._id, email: theUser.email ,user_name:theUser.user_name}, process.env.JWT_SECRET_KEY, { expiresIn: "2h" })
     res.status(200).json({ success: true, token: token, expiresIn: 2, data: { mail: theUser.email, username: theUser.user_name, } });
 
 })
